@@ -46,7 +46,7 @@ const Register = () => {
         Object.keys(form).forEach(key => {
             formData.append(key, form[key])
         })
-        formData.append('myFile', file)
+       if (file) formData.append('myFile', file)
 
         try {
             setLoading(true)

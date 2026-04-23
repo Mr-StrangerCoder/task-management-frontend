@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const SERVER_URL = "http://localhost:5010/"
+const SERVER_URL = "https://task-management-backend-1-oqkd.onrender.com/"
 
 
 const axiosInstance = axios.create({

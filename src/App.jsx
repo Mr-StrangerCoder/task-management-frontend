@@ -10,8 +10,8 @@ import CreateTask from '../components/task/CreateTask'
 import Profile from '../components/users/Profile'
 import MyTasks from '../components/task/MyTasks'
 import AllUsers from '../components/users/AllUsers'
-import DashboardStats from '../components/users/DashboardStats'
-import UsersWithTasks from '../components/users/UsersWithTasks'
+import DashboardStats from '../components/DashboardStats'
+import UsersWithTasks from '../components/userWithTasks'
 
 function App() {
 

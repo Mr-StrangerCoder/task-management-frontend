@@ -61,16 +61,16 @@ const DashboardStats = () => {
             {
                 data: [completed, pending, inprogress],
                 backgroundColor: [
-                    '#4CAF50', // green
-                    '#FF9800', // orange
-                    '#2196F3'  // blue
+                    '#4CAF50', 
+                    '#FF9800', 
+                    '#2196F3' 
                 ],
                 borderWidth: 1
             }
         ]
     }
 
-    // 🎨 BAR DATA (COLORFUL)
+
     const barData = {
         labels: ['High', 'Medium', 'Low'],
         datasets: [
@@ -78,9 +78,9 @@ const DashboardStats = () => {
                 label: 'Tasks by Priority',
                 data: [high, medium, low],
                 backgroundColor: [
-                    '#f44336', // red
-                    '#ffc107', // yellow
-                    '#4caf50'  // green
+                    '#f44336',
+                    '#ffc107',
+                    '#4caf50' 
                 ]
             }
         ]
@@ -91,7 +91,7 @@ const DashboardStats = () => {
 
             <h4 className="mb-4 fw-bold text-dark">📊 Dashboard Overview</h4>
 
-            {/* 🔢 STATS */}
+            
             <Row className="mb-4">
                 <Col md={4}>
                     <Card className="text-white shadow-lg border-0"
@@ -124,7 +124,7 @@ const DashboardStats = () => {
                 </Col>
             </Row>
 
-            {/* 📊 CHARTS */}
+            
             <Row>
                 <Col md={6}>
                     <Card className="p-3 shadow-lg border-0">

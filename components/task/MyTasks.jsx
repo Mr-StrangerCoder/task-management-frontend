@@ -8,16 +8,15 @@ const MyTasks = () => {
     const [filteredTasks, setFilteredTasks] = useState([])
 
 
-    const [statusMap, setStatusMap] = useState({}) // store selected status per row
+    const [statusMap, setStatusMap] = useState({})
     const [loadingId, setLoadingId] = useState(null)
 
-    // filters
     const [search, setSearch] = useState('')
     const [status, setStatus] = useState('')
     const [priority, setPriority] = useState('')
     const [month, setMonth] = useState('')
 
-    // pagination
+
     const [currentPage, setCurrentPage] = useState(1)
     const tasksPerPage = 10
 
@@ -26,12 +25,13 @@ const MyTasks = () => {
         if (res.data.success) {
             setTasks(res.data.tasks)
             setFilteredTasks(res.data.tasks)
-             // initialize statusMap
-            // const map = {}
-            // res.data.tasks.forEach(t => {
-            //     map[t.Task.id] = t.Task.status
-            // })
-            // setStatusMap(map)
+            // initialize statusMap
+
+            const map = {}
+            res.data.tasks.forEach(t => {
+                map[t.Task.id] = t.Task.status
+            })
+            setStatusMap(map)
         }
     }
 
@@ -39,28 +39,28 @@ const MyTasks = () => {
         fetch_my_tasks()
     }, [])
 
-    // 🔍 FILTER LOGIC
+
     useEffect(() => {
         let data = tasks
 
-        // search by title
+
         if (search) {
             data = data.filter(t =>
                 t.Task.title.toLowerCase().includes(search.toLowerCase())
             )
         }
 
-        // filter status
+
         if (status) {
             data = data.filter(t => t.Task.status === status)
         }
 
-        // filter priority
+
         if (priority) {
             data = data.filter(t => t.Task.priority === priority)
         }
 
-        // filter by month
+
         if (month) {
             data = data.filter(t => {
                 if (!t.Task.startDate) return false
@@ -74,14 +74,14 @@ const MyTasks = () => {
 
     }, [search, status, priority, month, tasks])
 
-    // 📄 PAGINATION LOGIC
+
     const indexOfLast = currentPage * tasksPerPage
     const indexOfFirst = indexOfLast - tasksPerPage
     const currentTasks = filteredTasks.slice(indexOfFirst, indexOfLast)
 
     const totalPages = Math.ceil(filteredTasks.length / tasksPerPage)
 
-    // badge colors
+
     const getStatusVariant = (status) => {
         switch (status) {
             case 'pending': return 'secondary'
@@ -100,23 +100,23 @@ const MyTasks = () => {
         }
     }
 
-    // 🎯 UPDATE TASK
-async function handleUpdate(taskId, status) {
-    console.log(taskId,"taskIdtaskIdtaskIdtaskIdtaskId")
-    try {
-        const res = await axiosInstance.patch(
-            `/tasks/update_my_task/${taskId}`,
-            { status }
-        )
 
-        if (res.data.success) {
-            fetch_my_tasks()
+    async function handleUpdate(taskId, status) {
+        console.log(taskId, "taskIdtaskIdtaskIdtaskIdtaskId")
+        try {
+            const res = await axiosInstance.patch(
+                `/tasks/update_my_task/${taskId}`,
+                { status }
+            )
+
+            if (res.data.success) {
+                fetch_my_tasks()
+            }
+
+        } catch (error) {
+            console.log(error)
         }
-
-    } catch (error) {
-        console.log(error)
     }
-}
 
 
     return (
@@ -124,7 +124,7 @@ async function handleUpdate(taskId, status) {
 
             <h4 className="mb-3">My Tasks</h4>
 
-            {/* 🔍 FILTERS */}
+
             <Row className="mb-3">
 
                 <Col md={3}>
@@ -166,7 +166,7 @@ async function handleUpdate(taskId, status) {
 
             </Row>
 
-            {/* 📋 TABLE */}
+
             <Table bordered hover responsive>
                 <thead>
                     <tr>
@@ -188,11 +188,11 @@ async function handleUpdate(taskId, status) {
                             <td>{t.Task.title}</td>
                             <td>{t.Task.description}</td>
 
-                            {/* STATUS DROPDOWN */}
+
                             <td>
                                 <Form.Select
-                                   defaultValue={t.Task.status}
-        onChange={(e) => t.Task.status = e.target.value}
+                                    defaultValue={t.Task.status}
+                                    onChange={(e) => setStatusMap(prev => ({ ...prev, [t.Task.id]: e.target.value }))}
                                 >
                                     <option value="pending">Pending</option>
                                     <option value="inprogress">In Progress</option>
@@ -217,12 +217,12 @@ async function handleUpdate(taskId, status) {
                                     ? t.Task.endDate.split('T')[0]
                                     : '-'}
                             </td>
-                            {/* UPDATE BUTTON */}
+
                             <td>
                                 <Button
                                     size="sm"
                                     variant="success"
-                                    onClick={() => handleUpdate(t.id, t.Task.status)}
+                                    onClick={() => handleUpdate(t.Task.id, statusMap[t.Task.id])}
                                     disabled={loadingId === t.Task.id}
                                 >
                                     {loadingId === t.Task.id ? 'Updating...' : 'Update'}
@@ -232,8 +232,7 @@ async function handleUpdate(taskId, status) {
                     ))}
                 </tbody>
             </Table>
-
-            {/* 📄 PAGINATION */}
+            
             <Pagination>
 
                 <Pagination.Prev

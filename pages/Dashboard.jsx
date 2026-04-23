@@ -6,12 +6,11 @@ import axiosInstance from '../api/axiosInstance'
 import { Outlet } from 'react-router-dom'
 
 const Dashboard = () => {
-
     const [user, setUser] = useState(null)
-     const [darkMode, setDarkMode] = useState(false)
+    const [darkMode, setDarkMode] = useState(false)
 
-     function toggleTheme() {
-        setDarkMode(!darkMode)
+    function toggleTheme() {
+        setDarkMode(prev => !prev)
     }
 
     async function fetchUser() {
@@ -29,42 +28,48 @@ const Dashboard = () => {
         fetchUser()
     }, [])
 
-    if (!user) return <h3 className="text-center mt-5">Loading Dashboard...</h3>
+    
+    useEffect(() => {
+        document.body.style.background = darkMode ? '#1a1a2e' : '#f8f9fa'
+    }, [darkMode])
+
+    if (!user) return (
+        <div className="d-flex justify-content-center align-items-center vh-100">
+            <div className="spinner-border text-primary" role="status" />
+        </div>
+    )
 
     return (
-      <div className={darkMode ? "bg-dark text-light" : "bg-light text-dark"} >
-        <div className="d-flex flex-column vh-100 ">
 
-            <Navbar user={user} />
+        <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+            className={darkMode ? 'bg-dark text-light' : 'bg-light text-dark'}>
 
-            <div className="container-fluid flex-grow-1">
-                <div className="row h-100">
+        
+            <Navbar user={user} darkMode={darkMode} toggleTheme={toggleTheme} />
 
-                    {/* Sidebar */}
-                    <div className="col-md-3 col-lg-2 bg-dark text-white p-0">
-                        <AsideBar user={user} darkMode={darkMode}/>
-                    </div>
+        
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-                    {/* Main Content */}
-                    <div className="col-md-9 col-lg-10 p-4 bg-light">
-
-                        <div className="card shadow-sm border-0">
-                            <div className="card-body">
-
-                                <Outlet context={{ user }} />
-
-                            </div>
-                        </div>
-
-                    </div>
-
+        
+                <div style={{ width: '220px', flexShrink: 0, minHeight: '100%' }}
+                    className="bg-dark text-white">
+                    <AsideBar user={user} darkMode={darkMode} />
                 </div>
+
+    
+                <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}
+                    className={darkMode ? 'bg-dark' : 'bg-light'}>
+                    <div className="card shadow-sm border-0 h-100">
+                        <div className="card-body">
+                            <Outlet context={{ user }} />
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <Footer />
-
         </div>
-      </div>
     )
 }
 
