@@ -12,7 +12,7 @@ const TaskList = () => {
     const [selectedTask, setSelectedTask] = useState(null)
     const [selectedUser, setSelectedUser] = useState('')
 
-    // 🔹 FETCH TASKS
+
     async function fetchTasks() {
     try {
         const res = await axiosInstance.get('/task/getAllTasks')
@@ -26,7 +26,7 @@ const TaskList = () => {
     }
 }
 
-    // 🔹 FETCH USERS
+
     async function fetchUsers() {
     try {
         const res = await axiosInstance.get('/user/getAllUsers')
@@ -38,7 +38,7 @@ const TaskList = () => {
 
     } catch (error) {
         console.log(error)
-        setUsers([]) // prevent crash
+        setUsers([]) 
     }
 }
 
@@ -47,13 +47,13 @@ const TaskList = () => {
         fetchUsers()
     }, [])
 
-    // 🔥 OPEN MODAL
+    
     function handleRowClick(task) {
         setSelectedTask(task)
         setShow(true)
     }
 
-    // 🔥 ASSIGN TASK
+
     async function handleAssign() {
         if (!selectedUser) {
             toast.error("Please select user")
@@ -84,7 +84,7 @@ const TaskList = () => {
 
                 <h4 className="mb-3 text-primary">All Tasks</h4>
 
-                {/* 📋 TASK TABLE */}
+            
                 <Table bordered hover responsive>
                     <thead>
                         <tr>
@@ -111,7 +111,7 @@ const TaskList = () => {
                     </tbody>
                 </Table>
 
-                {/* 🔥 ASSIGN MODAL */}
+            
                 <Modal show={show} onHide={() => setShow(false)} centered>
                     <Modal.Header closeButton>
                         <Modal.Title>Assign Task</Modal.Title>
