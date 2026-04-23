@@ -29,12 +29,12 @@ function App() {
           <Route path='profile' element={<Profile />} />
           <Route path='my-tasks' element={<MyTasks />} />
           <Route path='users' element={<AllUsers />} />
-
+          <Route path='stats' element={<DashboardStats />} />
+          <Route path='user-tasks' element={<UsersWithTasks />}/>
 
         </Route>
 
       </Routes>
-
 
     </BrowserRouter>
   )
