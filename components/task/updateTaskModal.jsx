@@ -2,87 +2,69 @@ import React, { useEffect, useState } from 'react'
 import { Modal, Button, Form } from 'react-bootstrap'
 import axiosInstance from '../../api/axiosInstance'
 import { toast } from 'react-toastify'
+import { FaEdit } from 'react-icons/fa'
 
 const UpdateTaskModal = ({ show, handleClose, task, refresh }) => {
+  const [form, setForm] = useState({})
 
-    const [form, setForm] = useState({})
+  useEffect(() => { if (task) setForm(task) }, [task])
 
-    useEffect(() => {
-        if (task) setForm(task)
-    }, [task])
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
 
-    function handleChange(e) {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        })
-    }
+  async function handleUpdate() {
+    const res = await axiosInstance.put(`/task/updateTaskByAdmin/${task.id}`, form)
+    if (res.data.success) { toast.success(res.data.msg); handleClose(); refresh() }
+  }
 
-    async function handleUpdate() {
-        const res = await axiosInstance.put(
-            `/task/updateTaskByAdmin/${task.id}`,
-            form
-        )
+  const labelStyle = { fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }
 
-        if (res.data.success) {
-            toast.success(res.data.msg)
-            handleClose()
-            refresh()
-        }
-    }
+  return (
+    <Modal show={show} onHide={handleClose} size="lg" centered>
+      <Modal.Header closeButton style={{ borderBottom: '1px solid var(--border)' }}>
+        <Modal.Title style={{ fontSize: '1rem', fontWeight: 700 }}>
+          <FaEdit style={{ marginRight: 8, color: 'var(--primary)' }} /> Edit Task
+        </Modal.Title>
+      </Modal.Header>
 
-    return (
-        <Modal show={show} onHide={handleClose} size="lg">
-            <Modal.Header closeButton>
-                <Modal.Title>Edit Task</Modal.Title>
-            </Modal.Header>
+      <Modal.Body className="d-flex flex-column gap-3">
+        <div>
+          <label style={labelStyle}>Title</label>
+          <Form.Control name="title" value={form.title || ''} onChange={handleChange} style={{ borderRadius: 10 }} />
+        </div>
+        <div>
+          <label style={labelStyle}>Description</label>
+          <Form.Control as="textarea" rows={3} name="description" value={form.description || ''} onChange={handleChange} style={{ borderRadius: 10 }} />
+        </div>
+        <div className="d-flex gap-3">
+          <div style={{ flex: 1 }}>
+            <label style={labelStyle}>Status</label>
+            <Form.Select name="status" value={form.status || ''} onChange={handleChange} style={{ borderRadius: 10 }}>
+              <option value="pending">⏳ Pending</option>
+              <option value="inprogress">🔄 In Progress</option>
+              <option value="completed">✅ Completed</option>
+            </Form.Select>
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={labelStyle}>Priority</label>
+            <Form.Select name="priority" value={form.priority || ''} onChange={handleChange} style={{ borderRadius: 10 }}>
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </Form.Select>
+          </div>
+        </div>
+      </Modal.Body>
 
-            <Modal.Body>
-
-                <Form.Group className="mb-2">
-                    <Form.Label>Title</Form.Label>
-                    <Form.Control
-                        name="title"
-                        value={form.title || ''}
-                        onChange={handleChange}
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-2">
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control
-                        name="description"
-                        value={form.description || ''}
-                        onChange={handleChange}
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-2">
-                    <Form.Label>Status</Form.Label>
-                    <Form.Select name="status" value={form.status || ''} onChange={handleChange}>
-                        <option value="pending">Pending</option>
-                        <option value="inprogress">In Progress</option>
-                        <option value="completed">Completed</option>
-                    </Form.Select>
-                </Form.Group>
-
-                <Form.Group className="mb-2">
-                    <Form.Label>Priority</Form.Label>
-                    <Form.Select name="priority" value={form.priority || ''} onChange={handleChange}>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </Form.Select>
-                </Form.Group>
-
-            </Modal.Body>
-
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-                <Button variant="success" onClick={handleUpdate}>Update</Button>
-            </Modal.Footer>
-        </Modal>
-    )
+      <Modal.Footer style={{ borderTop: '1px solid var(--border)' }}>
+        <Button variant="outline-secondary" onClick={handleClose} style={{ borderRadius: 10 }}>Cancel</Button>
+        <button className="btn-primary-app" onClick={handleUpdate}>
+          <FaEdit style={{ marginRight: 6 }} /> Save Changes
+        </button>
+      </Modal.Footer>
+    </Modal>
+  )
 }
 
 export default UpdateTaskModal

@@ -1,264 +1,187 @@
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../api/axiosInstance'
-import { Table, Form, Row, Col, Pagination, Badge, Button } from 'react-bootstrap'
+import { Pagination } from 'react-bootstrap'
+import { FaTasks, FaSearch } from 'react-icons/fa'
 
 const MyTasks = () => {
+  const [tasks, setTasks] = useState([])
+  const [filteredTasks, setFilteredTasks] = useState([])
+  const [statusMap, setStatusMap] = useState({})
+  const [loadingId, setLoadingId] = useState(null)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
+  const [priority, setPriority] = useState('')
+  const [month, setMonth] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const tasksPerPage = 10
 
-    const [tasks, setTasks] = useState([])
-    const [filteredTasks, setFilteredTasks] = useState([])
-
-
-    const [statusMap, setStatusMap] = useState({})
-    const [loadingId, setLoadingId] = useState(null)
-
-    const [search, setSearch] = useState('')
-    const [status, setStatus] = useState('')
-    const [priority, setPriority] = useState('')
-    const [month, setMonth] = useState('')
-
-
-    const [currentPage, setCurrentPage] = useState(1)
-    const tasksPerPage = 10
-
-    async function fetch_my_tasks() {
-        const res = await axiosInstance.get('/assignTask/my_tasks')
-        if (res.data.success) {
-            setTasks(res.data.tasks)
-            setFilteredTasks(res.data.tasks)
-            // initialize statusMap
-
-            const map = {}
-            res.data.tasks.forEach(t => {
-                map[t.Task.id] = t.Task.status
-            })
-            setStatusMap(map)
-        }
+  async function fetch_my_tasks() {
+    const res = await axiosInstance.get('/assignTask/my_tasks')
+    if (res.data.success) {
+      setTasks(res.data.tasks)
+      setFilteredTasks(res.data.tasks)
+      const map = {}
+      res.data.tasks.forEach(t => { map[t.Task.id] = t.Task.status })
+      setStatusMap(map)
     }
+  }
 
-    useEffect(() => {
-        fetch_my_tasks()
-    }, [])
+  useEffect(() => { fetch_my_tasks() }, [])
 
+  useEffect(() => {
+    let data = tasks
+    if (search) data = data.filter(t => t.Task.title.toLowerCase().includes(search.toLowerCase()))
+    if (status) data = data.filter(t => t.Task.status === status)
+    if (priority) data = data.filter(t => t.Task.priority === priority)
+    if (month) data = data.filter(t => {
+      if (!t.Task.startDate) return false
+      return new Date(t.Task.startDate).getMonth() + 1 === Number(month)
+    })
+    setFilteredTasks(data)
+    setCurrentPage(1)
+  }, [search, status, priority, month, tasks])
 
-    useEffect(() => {
-        let data = tasks
+  const indexOfLast = currentPage * tasksPerPage
+  const indexOfFirst = indexOfLast - tasksPerPage
+  const currentTasks = filteredTasks.slice(indexOfFirst, indexOfLast)
+  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage)
 
+  async function handleUpdate(taskId, status) {
+    console.log(taskId, 'taskIdtaskIdtaskIdtaskIdtaskId')
+    try {
+      const res = await axiosInstance.patch(`/task/update_my_task/${taskId}`, { status })
+      if (res.data.success) fetch_my_tasks()
+    } catch (error) { console.log(error) }
+  }
 
-        if (search) {
-            data = data.filter(t =>
-                t.Task.title.toLowerCase().includes(search.toLowerCase())
-            )
-        }
+  const selectStyle = { background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 8, padding: '6px 10px', fontSize: '0.82rem' }
 
+  return (
+    <div>
+      <div className="page-header mb-4">
+        <div className="page-header-icon"><FaTasks /></div>
+        <h4>My Tasks</h4>
+        <span style={{ marginLeft: 'auto', background: 'rgba(99,102,241,0.1)', color: 'var(--primary)', borderRadius: 20, padding: '4px 14px', fontSize: '0.8rem', fontWeight: 700 }}>
+          {filteredTasks.length} tasks
+        </span>
+      </div>
 
-        if (status) {
-            data = data.filter(t => t.Task.status === status)
-        }
-
-
-        if (priority) {
-            data = data.filter(t => t.Task.priority === priority)
-        }
-
-
-        if (month) {
-            data = data.filter(t => {
-                if (!t.Task.startDate) return false
-                const taskMonth = new Date(t.Task.startDate).getMonth() + 1
-                return taskMonth === Number(month)
-            })
-        }
-
-        setFilteredTasks(data)
-        setCurrentPage(1)
-
-    }, [search, status, priority, month, tasks])
-
-
-    const indexOfLast = currentPage * tasksPerPage
-    const indexOfFirst = indexOfLast - tasksPerPage
-    const currentTasks = filteredTasks.slice(indexOfFirst, indexOfLast)
-
-    const totalPages = Math.ceil(filteredTasks.length / tasksPerPage)
-
-
-    const getStatusVariant = (status) => {
-        switch (status) {
-            case 'pending': return 'secondary'
-            case 'inprogress': return 'warning'
-            case 'completed': return 'success'
-            default: return 'dark'
-        }
-    }
-
-    const getPriorityVariant = (priority) => {
-        switch (priority) {
-            case 'high': return 'danger'
-            case 'medium': return 'warning'
-            case 'low': return 'info'
-            default: return 'dark'
-        }
-    }
-
-
-    async function handleUpdate(taskId, status) {
-        console.log(taskId, "taskIdtaskIdtaskIdtaskIdtaskId")
-        try {
-            const res = await axiosInstance.patch(
-                `/task/update_my_task/${taskId}`,
-                { status }
-            )
-
-            if (res.data.success) {
-                fetch_my_tasks()
-            }
-
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-
-    return (
-        <div>
-
-            <h4 className="mb-3">My Tasks</h4>
-
-
-            <Row className="mb-3">
-
-                <Col md={3}>
-                    <Form.Control
-                        placeholder="Search by title"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </Col>
-
-                <Col md={2}>
-                    <Form.Select onChange={(e) => setStatus(e.target.value)}>
-                        <option value="">Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="inprogress">In Progress</option>
-                        <option value="completed">Completed</option>
-                    </Form.Select>
-                </Col>
-
-                <Col md={2}>
-                    <Form.Select onChange={(e) => setPriority(e.target.value)}>
-                        <option value="">Priority</option>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </Form.Select>
-                </Col>
-
-                <Col md={2}>
-                    <Form.Select onChange={(e) => setMonth(e.target.value)}>
-                        <option value="">Month</option>
-                        {[...Array(12)].map((_, i) => (
-                            <option key={i} value={i + 1}>
-                                {i + 1}
-                            </option>
-                        ))}
-                    </Form.Select>
-                </Col>
-
-            </Row>
-
-
-            <Table bordered hover responsive>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Priority</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {currentTasks.map((t, index) => (
-                        <tr key={t.id}>
-                            <td>{indexOfFirst + index + 1}</td>
-                            <td>{t.Task.title}</td>
-                            <td>{t.Task.description}</td>
-
-
-                            <td>
-                                <Form.Select
-                                    defaultValue={t.Task.status}
-                                    onChange={(e) => setStatusMap(prev => ({ ...prev, [t.Task.id]: e.target.value }))}
-                                >
-                                    <option value="pending">Pending</option>
-                                    <option value="inprogress">In Progress</option>
-                                    <option value="completed">Completed</option>
-                                </Form.Select>
-                            </td>
-
-                            <td>
-                                <Badge bg={getPriorityVariant(t.Task.priority)}>
-                                    {t.Task.priority}
-                                </Badge>
-                            </td>
-
-                            <td>
-                                {t.Task.startDate
-                                    ? t.Task.startDate.split('T')[0]
-                                    : '-'}
-                            </td>
-
-                            <td>
-                                {t.Task.endDate
-                                    ? t.Task.endDate.split('T')[0]
-                                    : '-'}
-                            </td>
-
-                            <td>
-                                <Button
-                                    size="sm"
-                                    variant="success"
-                                    onClick={() => handleUpdate(t.Task.id, statusMap[t.Task.id])}
-                                    disabled={loadingId === t.Task.id}
-                                >
-                                    {loadingId === t.Task.id ? 'Updating...' : 'Update'}
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-
-            <Pagination>
-
-                <Pagination.Prev
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                />
-
-                {[...Array(totalPages)].map((_, i) => (
-                    <Pagination.Item
-                        key={i}
-                        active={i + 1 === currentPage}
-                        onClick={() => setCurrentPage(i + 1)}
-                    >
-                        {i + 1}
-                    </Pagination.Item>
-                ))}
-
-                <Pagination.Next
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                />
-
-            </Pagination>
-
+      {/* Filters */}
+      <div className="filter-bar mb-4">
+        <div className="d-flex align-items-center gap-2 flex-grow-1" style={{ minWidth: 180 }}>
+          <FaSearch style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }} />
+          <input
+            className="form-control form-control-sm"
+            placeholder="Search tasks..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ border: 'none', background: 'transparent', boxShadow: 'none', padding: '4px 0' }}
+          />
         </div>
-    )
+
+        <select style={selectStyle} onChange={e => setStatus(e.target.value)}>
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="inprogress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+
+        <select style={selectStyle} onChange={e => setPriority(e.target.value)}>
+          <option value="">All Priority</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+
+        <select style={selectStyle} onChange={e => setMonth(e.target.value)}>
+          <option value="">All Months</option>
+          {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((m, i) => (
+            <option key={i} value={i + 1}>{m}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="app-card" style={{ overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="table app-table mb-0">
+            <thead>
+              <tr>
+                <th style={{ width: 50 }}>#</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th style={{ width: 160 }}>Status</th>
+                <th>Priority</th>
+                <th>Start</th>
+                <th>End</th>
+                <th style={{ width: 110 }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentTasks.map((t, index) => (
+                <tr key={t.id}>
+                  <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{indexOfFirst + index + 1}</td>
+                  <td style={{ fontWeight: 600, color: 'var(--text-heading)' }}>{t.Task.title}</td>
+                  <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem', maxWidth: 200 }}>
+                    <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {t.Task.description}
+                    </span>
+                  </td>
+                  <td>
+                    <select
+                      className="form-select form-select-sm"
+                      defaultValue={t.Task.status}
+                      onChange={e => setStatusMap(prev => ({ ...prev, [t.Task.id]: e.target.value }))}
+                      style={{ borderRadius: 8, fontSize: '0.82rem' }}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="inprogress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </td>
+                  <td><span className={`priority-badge ${t.Task.priority}`}>{t.Task.priority}</span></td>
+                  <td style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    {t.Task.startDate ? t.Task.startDate.split('T')[0] : '—'}
+                  </td>
+                  <td style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    {t.Task.endDate ? t.Task.endDate.split('T')[0] : '—'}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-sm fw-600"
+                      style={{
+                        background: 'rgba(16,185,129,0.1)', color: '#059669',
+                        border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8,
+                        fontSize: '0.78rem', fontWeight: 700
+                      }}
+                      onClick={() => handleUpdate(t.Task.id, statusMap[t.Task.id])}
+                      disabled={loadingId === t.Task.id}
+                    >
+                      {loadingId === t.Task.id ? '...' : '✓ Save'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-center mt-3">
+          <Pagination size="sm">
+            <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)} />
+            {[...Array(totalPages)].map((_, i) => (
+              <Pagination.Item key={i} active={i + 1 === currentPage} onClick={() => setCurrentPage(i + 1)}>
+                {i + 1}
+              </Pagination.Item>
+            ))}
+            <Pagination.Next disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)} />
+          </Pagination>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default MyTasks

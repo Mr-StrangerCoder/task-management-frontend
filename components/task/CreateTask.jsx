@@ -1,171 +1,116 @@
 import React, { useState } from 'react'
 import axiosInstance from '../../api/axiosInstance'
-import { Form, Button, Card, Row, Col } from 'react-bootstrap'
+import { Row, Col } from 'react-bootstrap'
 import { toast } from 'react-toastify'
+import { FaPlus, FaAlignLeft, FaFlag, FaCalendarAlt } from 'react-icons/fa'
 
 const CreateTask = () => {
+  const [form, setForm] = useState({
+    title: '', description: '', startDate: '', endDate: '', status: 'pending', priority: 'low'
+  })
+  const [loading, setLoading] = useState(false)
 
-    const [form, setForm] = useState({
-        title: '',
-        description: '',
-        startDate: '',
-        endDate: '',
-        status: 'pending',
-        priority: 'low'
-    })
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
 
-    const [loading, setLoading] = useState(false)
-
-    function handleChange(e) {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        })
-    }
-
-    async function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-
     try {
-        setLoading(true)
-
-        const res = await axiosInstance.post('/task/create', form)
-
-        console.log(res.data)
-
-        if (res.data.success) {
-            toast.success(res.data.msg)
-
-            setForm({
-                title: '',
-                description: '',
-                startDate: '',
-                endDate: '',
-                status: 'pending',
-                priority: 'low'
-            })
-        } else {
-            toast.error(res.data.msg || "Failed to create task")
-        }
-
+      setLoading(true)
+      const res = await axiosInstance.post('/task/create', form)
+      console.log(res.data)
+      if (res.data.success) {
+        toast.success(res.data.msg)
+        setForm({ title: '', description: '', startDate: '', endDate: '', status: 'pending', priority: 'low' })
+      } else {
+        toast.error(res.data.msg || 'Failed to create task')
+      }
     } catch (error) {
-        console.log(error)
-        toast.error(error.response?.data?.msg || "Something went wrong")
+      console.log(error)
+      toast.error(error.response?.data?.msg || 'Something went wrong')
     } finally {
-        setLoading(false)
+      setLoading(false)
     }
-}
-    return (
-        <Card className="shadow-sm">
-            <Card.Body>
+  }
 
-                <h4 className="mb-4 text-primary">Create Task</h4>
+  const labelStyle = { fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }
+  const controlStyle = { background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 10, padding: '9px 14px' }
 
-                <Form onSubmit={handleSubmit}>
+  return (
+    <div>
+      <div className="page-header mb-4">
+        <div className="page-header-icon"><FaPlus /></div>
+        <h4>Create New Task</h4>
+      </div>
 
-                    <Row className="mb-3">
+      <div className="app-card p-4" style={{ maxWidth: 720 }}>
+        <form onSubmit={handleSubmit}>
+          <Row className="g-3 mb-3">
+            <Col md={8}>
+              <label style={labelStyle}>Task Title</label>
+              <input
+                type="text" name="title" value={form.title}
+                className="form-control" style={controlStyle}
+                placeholder="Enter a clear, descriptive title"
+                onChange={handleChange} required
+              />
+            </Col>
+            <Col md={4}>
+              <label style={labelStyle}><FaFlag style={{ marginRight: 4 }} /> Priority</label>
+              <select name="priority" value={form.priority} className="form-select" style={controlStyle} onChange={handleChange}>
+                <option value="low">🟢 Low</option>
+                <option value="medium">🟡 Medium</option>
+                <option value="high">🔴 High</option>
+              </select>
+            </Col>
+          </Row>
 
-                        <Col md={6}>
-                            <Form.Group>
-                                <Form.Label>Title</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    name="title"
-                                    value={form.title}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
+          <div className="mb-3">
+            <label style={labelStyle}><FaAlignLeft style={{ marginRight: 4 }} /> Description</label>
+            <textarea
+              name="description" value={form.description}
+              className="form-control" style={{ ...controlStyle, resize: 'vertical' }}
+              rows={4} placeholder="Describe what needs to be done..."
+              onChange={handleChange}
+            />
+          </div>
 
-                        <Col md={6}>
-                            <Form.Group>
-                                <Form.Label>Priority</Form.Label>
-                                <Form.Select
-                                    name="priority"
-                                    value={form.priority}
-                                    onChange={handleChange}
-                                >
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                </Form.Select>
-                            </Form.Group>
-                        </Col>
+          <Row className="g-3 mb-3">
+            <Col md={6}>
+              <label style={labelStyle}><FaCalendarAlt style={{ marginRight: 4 }} /> Start Date</label>
+              <input type="date" name="startDate" value={form.startDate} className="form-control" style={controlStyle} onChange={handleChange} />
+            </Col>
+            <Col md={6}>
+              <label style={labelStyle}><FaCalendarAlt style={{ marginRight: 4 }} /> End Date</label>
+              <input type="date" name="endDate" value={form.endDate} className="form-control" style={controlStyle} onChange={handleChange} />
+            </Col>
+          </Row>
 
-                    </Row>
+          <div className="mb-4" style={{ maxWidth: 240 }}>
+            <label style={labelStyle}>Status</label>
+            <select name="status" value={form.status} className="form-select" style={controlStyle} onChange={handleChange}>
+              <option value="pending">⏳ Pending</option>
+              <option value="inprogress">🔄 In Progress</option>
+              <option value="completed">✅ Completed</option>
+            </select>
+          </div>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Description</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            name="description"
-                            value={form.description}
-                            onChange={handleChange}
-                        />
-                    </Form.Group>
-
-                    <Row className="mb-3">
-
-                        <Col md={6}>
-                            <Form.Group>
-                                <Form.Label>Start Date</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    name="startDate"
-                                    value={form.startDate}
-                                    onChange={handleChange}
-                                />
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={6}>
-                            <Form.Group>
-                                <Form.Label>End Date</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    name="endDate"
-                                    value={form.endDate}
-                                    onChange={handleChange}
-                                />
-                            </Form.Group>
-                        </Col>
-
-                    </Row>
-
-                    <Row className="mb-3">
-
-                        <Col md={6}>
-                            <Form.Group>
-                                <Form.Label>Status</Form.Label>
-                                <Form.Select
-                                    name="status"
-                                    value={form.status}
-                                    onChange={handleChange}
-                                >
-                                    <option value="pending">Pending</option>
-                                    <option value="inprogress">In Progress</option>
-                                    <option value="completed">Completed</option>
-                                </Form.Select>
-                            </Form.Group>
-                        </Col>
-
-                    </Row>
-
-                    <Button
-                        variant="primary"
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? 'Creating...' : 'Create Task'}
-                    </Button>
-
-                </Form>
-
-            </Card.Body>
-        </Card>
-    )
+          <button
+            type="submit"
+            className="btn-primary-app d-flex align-items-center gap-2"
+            disabled={loading}
+          >
+            {loading ? (
+              <><span className="spinner-border spinner-border-sm" /> Creating...</>
+            ) : (
+              <><FaPlus /> Create Task</>
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
 }
 
 export default CreateTask

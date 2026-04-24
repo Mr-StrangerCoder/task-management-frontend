@@ -1,95 +1,106 @@
 import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { FaUser, FaTasks, FaPlus, FaUsers, FaSignOutAlt } from 'react-icons/fa'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import {
+  FaUser, FaTasks, FaPlus, FaUsers,
+  FaSignOutAlt, FaChartPie, FaLayerGroup
+} from 'react-icons/fa'
 
 const AsideBar = ({ user }) => {
+  const navigate = useNavigate()
+  const location = useLocation()
 
-    const navigate = useNavigate()
+  function handleLogout() {
+    localStorage.removeItem('b69')
+    navigate('/')
+  }
 
-    function handleLogout() {
-        localStorage.removeItem('b69')
-        navigate('/')
-    }
+  const isActive = (path) => location.pathname === path
 
-    return (
-        <div className="p-3 ">
-            <div className="text-center mb-4">
-                <img
-                    src={user.img_path || 'https://via.placeholder.com/80'}
-                    alt="profile"
-                    width="80"
-                    height="80" 
-                    style={{
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        border: "3px solid white"
-                    }}
-                />
+  const NavItem = ({ to, icon, label }) => (
+    <li className="nav-item">
+      <Link
+        className={`nav-link ${isActive(to) ? 'active' : ''}`}
+        to={to}
+        style={isActive(to) ? { background: 'rgba(99,102,241,0.25)', color: '#fff' } : {}}
+      >
+        {icon}
+        <span>{label}</span>
+      </Link>
+    </li>
+  )
 
-                <h6 className="mt-2">{user?.name
-                    ?.split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ')}</h6>
-                <small className="text-light">{user.role}</small>
-
-            </div>
-
-            <hr className="text-secondary" />
-
-            <h6 className="text-light mb-3 text-center">Menu</h6>
-
-            <ul className="nav flex-column gap-2">
-
-                <li className="nav-item">
-                    <Link className="nav-link text-white d-flex align-items-center gap-2" to="/protected/profile">
-                        <FaUser /> Profile
-                    </Link>
-                </li>
-
-                {/* USER MENU */}
-                {user?.role === 'user' && (
-                    <li className="nav-item">
-                        <Link className="nav-link text-white d-flex align-items-center gap-2" to="/protected/my-tasks">
-                            <FaTasks /> My Tasks
-                        </Link>
-                    </li>
-                )}
-
-                {/* ADMIN MENU */}
-                {user?.role === 'admin' && (
-                    <>
-                        <li className="nav-item">
-                            <Link className="nav-link text-white d-flex align-items-center gap-2" to="/protected/tasks">
-                                <FaTasks /> All Tasks
-                            </Link>
-                        </li>
-
-                        <li className="nav-item">
-                            <Link className="nav-link text-white d-flex align-items-center gap-2" to="/protected/create-task">
-                                <FaPlus /> Create Task
-                            </Link>
-                        </li>
-
-                        <li className="nav-item">
-                            <Link className="nav-link text-white d-flex align-items-center gap-2" to="/protected/users">
-                                <FaUsers /> All Users
-                            </Link>
-                        </li>
-                    </>
-                )}
-
-                <li className="mt-3">
-                    <button className="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2"
-                        onClick={handleLogout}>
-                        <FaSignOutAlt />
-                        Logout
-                    </button>
-                </li>
-
-            </ul>
-
+  return (
+    <div className="d-flex flex-column h-100 py-3 px-3">
+      {/* Profile Section */}
+      <div className="text-center mb-4 pt-2">
+        <div className="profile-avatar-ring mx-auto mb-2" style={{ width: 72, height: 72 }}>
+          <img
+            src={user.img_path || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`}
+            alt="profile"
+          />
         </div>
-    )
+        <h6 style={{ color: '#f1f5f9', fontWeight: 600, marginBottom: 2, fontSize: '0.95rem' }}>
+          {user?.name?.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+        </h6>
+        <span
+          style={{
+            fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase',
+            letterSpacing: '0.07em', padding: '2px 10px', borderRadius: 20,
+            background: 'rgba(99,102,241,0.35)', color: '#a5b4fc'
+          }}
+        >
+          {user.role}
+        </span>
+      </div>
+
+      <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '0 0 12px' }} />
+
+      <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>
+        Navigation
+      </p>
+
+      <ul className="nav flex-column gap-1 flex-grow-1">
+        <NavItem to="/protected/profile" icon={<FaUser />} label="Profile" />
+
+        {user?.role === 'user' && (
+          <NavItem to="/protected/my-tasks" icon={<FaTasks />} label="My Tasks" />
+        )}
+
+        {user?.role === 'admin' && (
+          <>
+            <NavItem to="/protected/stats" icon={<FaChartPie />} label="Dashboard" />
+            <NavItem to="/protected/tasks" icon={<FaTasks />} label="All Tasks" />
+            <NavItem to="/protected/create-task" icon={<FaPlus />} label="Create Task" />
+            <NavItem to="/protected/users" icon={<FaUsers />} label="All Users" />
+            <NavItem to="/protected/user-tasks" icon={<FaLayerGroup />} label="User Tasks" />
+          </>
+        )}
+      </ul>
+
+      {/* Logout */}
+      <div className="mt-auto pt-3">
+        <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '0 0 12px' }} />
+        <button
+          className="btn w-100 d-flex align-items-center justify-content-center gap-2"
+          onClick={handleLogout}
+          style={{
+            background: 'rgba(239,68,68,0.15)',
+            border: '1px solid rgba(239,68,68,0.3)',
+            color: '#fca5a5',
+            borderRadius: 10,
+            padding: '8px 12px',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            transition: 'background 0.2s'
+          }}
+          onMouseOver={e => e.currentTarget.style.background = 'rgba(239,68,68,0.28)'}
+          onMouseOut={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}
+        >
+          <FaSignOutAlt /> Logout
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default AsideBar
