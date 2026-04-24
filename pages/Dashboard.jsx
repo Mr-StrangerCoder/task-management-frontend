@@ -6,71 +6,66 @@ import axiosInstance from '../api/axiosInstance'
 import { Outlet } from 'react-router-dom'
 
 const Dashboard = () => {
-    const [user, setUser] = useState(null)
-    const [darkMode, setDarkMode] = useState(false)
+  const [user, setUser] = useState(null)
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem('theme') === 'dark'
+  )
 
-    function toggleTheme() {
-        setDarkMode(prev => !prev)
+  function toggleTheme() {
+    setDarkMode(prev => {
+      const next = !prev
+      localStorage.setItem('theme', next ? 'dark' : 'light')
+      return next
+    })
+  }
+
+  async function fetchUser() {
+    try {
+      const res = await axiosInstance.get('/user/getUserInfo')
+      if (res.data.success) setUser(res.data.user)
+    } catch (error) {
+      console.log(error)
     }
+  }
 
-    async function fetchUser() {
-        try {
-            const res = await axiosInstance.get('/user/getUserInfo')
-            if (res.data.success) {
-                setUser(res.data.user)
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
+  useEffect(() => { fetchUser() }, [])
 
-    useEffect(() => {
-        fetchUser()
-    }, [])
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
 
-    
-    useEffect(() => {
-        document.body.style.background = darkMode ? '#1a1a2e' : '#f8f9fa'
-    }, [darkMode])
+  if (!user) return (
+    <div className="d-flex justify-content-center align-items-center vh-100" style={{ background: 'var(--bg)' }}>
+      <div className="text-center">
+        <div
+          className="spinner-border mb-3"
+          role="status"
+          style={{ color: 'var(--primary)', width: 48, height: 48, borderWidth: 4 }}
+        />
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading your workspace...</p>
+      </div>
+    </div>
+  )
 
-    if (!user) return (
-        <div className="d-flex justify-content-center align-items-center vh-100">
-            <div className="spinner-border text-primary" role="status" />
+  return (
+    <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+      <Navbar user={user} darkMode={darkMode} toggleTheme={toggleTheme} />
+
+      <div className="main-layout">
+        <div className="sidebar">
+          <AsideBar user={user} darkMode={darkMode} />
         </div>
-    )
 
-    return (
-
-        <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
-            className={darkMode ? 'bg-dark text-light' : 'bg-light text-dark'}>
-
-        
-            <Navbar user={user} darkMode={darkMode} toggleTheme={toggleTheme} />
-
-        
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-
-        
-                <div style={{ width: '220px', flexShrink: 0, minHeight: '100%' }}
-                    className="bg-dark text-white">
-                    <AsideBar user={user} darkMode={darkMode} />
-                </div>
-
-    
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}
-                    className={darkMode ? 'bg-dark' : 'bg-light'}>
-                    <div className="card shadow-sm border-0 h-100">
-                        <div className="card-body">
-                            <Outlet context={{ user }} />
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <Footer />
+        <div className="content-area">
+          <div className="app-card p-4 h-100" style={{ minHeight: '100%' }}>
+            <Outlet context={{ user }} />
+          </div>
         </div>
-    )
+      </div>
+
+      <Footer />
+    </div>
+  )
 }
 
 export default Dashboard
