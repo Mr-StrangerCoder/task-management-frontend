@@ -15,7 +15,7 @@ const AsideBar = ({ user }) => {
         <div className="p-3 ">
             <div className="text-center mb-4">
                 <img
-                    src={user.img_path}
+                    src={user.img_path || 'https://via.placeholder.com/80'}
                     alt="profile"
                     width="80"
                     height="80"

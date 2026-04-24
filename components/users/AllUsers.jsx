@@ -15,8 +15,8 @@ const AllUsers = () => {
             // console.log(res.data, "0000000000000000000000000")
 
             if (res.data.success) {
-                setUsers(res.data.allUser || [])
-                setFilteredUsers(res.data.allUser || [])
+               setUsers(res.data.allUsers || [])
+setFilteredUsers(res.data.allUsers || [])
             }
 
         } catch (error) {

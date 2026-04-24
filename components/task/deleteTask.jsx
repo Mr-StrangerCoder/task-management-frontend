@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 const DeleteModal = ({ show, handleClose, task, refresh }) => {
 
     async function handleDelete() {
-        const res = await axiosInstance.delete(`/tasks/deleteTask/${task.id}`)
+        const res = await axiosInstance.delete(`/task/deleteTask/${task.id}`)
 
         if (res.data.success) {
             toast.success("Deleted successfully")

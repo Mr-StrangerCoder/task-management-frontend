@@ -20,7 +20,7 @@ const UpdateTaskModal = ({ show, handleClose, task, refresh }) => {
 
     async function handleUpdate() {
         const res = await axiosInstance.put(
-            `/tasks/updateTaskByAdmin/${task.id}`,
+            `/task/updateTaskByAdmin/${task.id}`,
             form
         )
 

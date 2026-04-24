@@ -28,7 +28,7 @@ const DashboardStats = () => {
 
     async function fetchData() {
         try {
-            const taskRes = await axiosInstance.get('/tasks/getAllTasks')
+            const taskRes = await axiosInstance.get('/task/getAllTasks')
             const userRes = await axiosInstance.get('/user/getAllUsers')
 
             if (taskRes.data.success) setTasks(taskRes.data.allTasks)

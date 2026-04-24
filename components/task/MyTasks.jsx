@@ -105,7 +105,7 @@ const MyTasks = () => {
         console.log(taskId, "taskIdtaskIdtaskIdtaskIdtaskId")
         try {
             const res = await axiosInstance.patch(
-                `/tasks/update_my_task/${taskId}`,
+                `/task/update_my_task/${taskId}`,
                 { status }
             )
 
@@ -232,7 +232,7 @@ const MyTasks = () => {
                     ))}
                 </tbody>
             </Table>
-            
+
             <Pagination>
 
                 <Pagination.Prev
