@@ -18,7 +18,7 @@ const AsideBar = ({ user }) => {
                     src={user.img_path || 'https://via.placeholder.com/80'}
                     alt="profile"
                     width="80"
-                    height="80"
+                    height="80" 
                     style={{
                         borderRadius: "50%",
                         objectFit: "cover",
