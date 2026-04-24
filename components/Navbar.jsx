@@ -4,7 +4,7 @@ import { FaMoon, FaSun, FaBolt, FaBell } from 'react-icons/fa'
 const Navbar = ({ user, darkMode, toggleTheme }) => {
   return (
     <nav className="app-navbar d-flex align-items-center px-4 py-2" style={{ height: 60 }}>
-      {/* Brand */}
+      
       <div className="d-flex align-items-center gap-2 me-auto">
         <div
           style={{
